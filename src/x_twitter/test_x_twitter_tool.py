@@ -1,4 +1,5 @@
 import json
+import subprocess
 import tempfile
 import unittest
 from unittest import mock
@@ -68,25 +69,17 @@ class XTwitterToolTest(unittest.TestCase):
             + json.dumps(data)
             + "</script></html>"
         )
-        captured = {}
-
-        def fake_http_get(url, headers=None, timeout=15):
-            captured["url"] = url
-            captured["headers"] = headers
-            captured["timeout"] = timeout
-            return "text/html", html.encode()
-
+        fake_result = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=html.encode(), stderr=b""
+        )
         with mock.patch(
-            "x_twitter.x_twitter_tool.http_tool.http_get", side_effect=fake_http_get
-        ):
+            "x_twitter.x_twitter_tool.subprocess.run", return_value=fake_result
+        ) as mocked_run:
             posts, error = x_twitter_tool.fetch_x_posts("Open AI")
 
-        self.assertEqual(
-            captured["url"],
-            "https://syndication.twitter.com/srv/timeline-profile/screen-name/Open%20AI",
-        )
-        self.assertEqual(captured["headers"], {"Accept": "text/html"})
-        self.assertEqual(captured["timeout"], 12)
+        call_args = mocked_run.call_args
+        cmd = call_args[0][0]
+        self.assertIn("Open%20AI", cmd[-1])
         self.assertIsNone(error)
         self.assertEqual(len(posts), 1)
         self.assertEqual(posts[0]["account"], "Open AI")
@@ -107,11 +100,13 @@ class XTwitterToolTest(unittest.TestCase):
                 ]
             }
         }
-        html = '<script id="__NEXT_DATA__">%s</script>' % json.dumps(data)
+        html_bytes = ('<script id="__NEXT_DATA__">%s</script>' % json.dumps(data)).encode()
 
+        fake_result = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=html_bytes, stderr=b""
+        )
         with mock.patch(
-            "x_twitter.x_twitter_tool.http_tool.http_get",
-            return_value=("text/html", html.encode()),
+            "x_twitter.x_twitter_tool.subprocess.run", return_value=fake_result
         ):
             posts, error = x_twitter_tool.fetch_x_posts("OpenAI")
             self.assertEqual(
@@ -121,7 +116,8 @@ class XTwitterToolTest(unittest.TestCase):
             self.assertIsNone(error)
 
         with mock.patch(
-            "x_twitter.x_twitter_tool.http_tool.http_get", side_effect=TimeoutError
+            "x_twitter.x_twitter_tool.subprocess.run",
+            side_effect=subprocess.TimeoutExpired(cmd="curl", timeout=15),
         ):
             posts, error = x_twitter_tool.fetch_x_posts("OpenAI")
 

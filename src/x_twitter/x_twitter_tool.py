@@ -2,11 +2,11 @@
 
 import json
 import re
-import urllib.error
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
 
-from shared import accounts_tool, cache_tool, http_tool
+from shared import accounts_tool, cache_tool
 
 NEGATIVE_CACHE_TTL = 120
 
@@ -55,19 +55,22 @@ def fetch_x_posts(username: str):
         + quote(username)
     )
     try:
-        _, body = http_tool.http_get(url, headers={"Accept": "text/html"}, timeout=12)
-        html = body.decode("utf-8", "ignore")
+        # Use curl subprocess to avoid urllib TLS fingerprint being blocked
+        # by Cloudflare (syndication endpoint returns 429 for Python urllib
+        # but 200 for curl's SecureTransport stack).
+        proc = subprocess.run(
+            ["curl", "-s", "-H", "Accept: text/html", url],
+            capture_output=True, timeout=15,
+        )
+        if proc.returncode != 0:
+            return [], {"account": username, "kind": "http", "code": None}
+        html = proc.stdout.decode("utf-8", "ignore")
         match = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
         if not match:
             return [], {"account": username, "kind": "parse", "code": None}
         data = json.loads(match.group(1))
-    except urllib.error.HTTPError as exc:
-        return [], {"account": username, "kind": "http", "code": exc.code}
-    except TimeoutError:
+    except subprocess.TimeoutExpired:
         return [], {"account": username, "kind": "timeout", "code": None}
-    except urllib.error.URLError as exc:
-        kind = "timeout" if isinstance(exc.reason, TimeoutError) else "http"
-        return [], {"account": username, "kind": kind, "code": None}
     except (json.JSONDecodeError, UnicodeDecodeError):
         return [], {"account": username, "kind": "parse", "code": None}
     except OSError:
