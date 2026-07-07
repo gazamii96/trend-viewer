@@ -56,11 +56,13 @@
   #searchInput { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 8px 13px; color: var(--text); font-size: 13px; width: 230px; transition: border-color var(--transition), background-color var(--transition); }
   #searchInput:focus { border-color: var(--accent2); }
   #searchBtn { background: var(--accent); border: none; color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; transition: transform var(--transition-fast), background-color var(--transition), border-color var(--transition); }
-  #refreshBtn { background: var(--surface-1); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; transition: transform var(--transition-fast), background-color var(--transition), border-color var(--transition); }
-  #refreshBtn:hover { border-color: var(--border-hover); background: var(--surface-3); }
+  #refreshBtn, #clearSeenBtn { background: var(--surface-1); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; transition: transform var(--transition-fast), background-color var(--transition), border-color var(--transition); }
+  #clearSeenBtn { width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+  #refreshBtn:hover, #clearSeenBtn:hover { border-color: var(--border-hover); background: var(--surface-3); }
   #updated { color: var(--muted); font-size: 12px; }
 
-  .tabs { display: flex; gap: 8px; padding: 14px 24px 0; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 8px; padding: 14px 24px 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
   .tab { padding: 9px 18px 8px; border-radius: 8px 8px 0 0; background: transparent; color: var(--muted); border: 1px solid transparent; border-bottom: 2px solid transparent; cursor: pointer; font-size: 14px; font-weight: 700; transition: background-color var(--transition), border-color var(--transition), color var(--transition), transform var(--transition-fast); }
   .tab:hover { color: var(--text-secondary); border-color: var(--border-hover); border-bottom-color: transparent; }
   .tab.active { background: var(--surface-1); color: var(--text); border-color: var(--border); border-bottom-color: var(--tab-color, var(--accent)); }
@@ -78,6 +80,8 @@
   .trend-card, .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform var(--transition-fast), border-color var(--transition-fast), background-color var(--transition); position: relative; }
   .trend-card:hover, .card:hover { transform: translateY(-3px); border-color: var(--border-hover); }
   .trend-card:active, .card:active, .linkcard:active, .modelcard:active, .newsitem:active, .postcard:active { transform: scale(0.98); }
+  .seen .thumb, .seen .pmedia, .seen .title, .seen .ptext, .seen .home-row-thumb, .seen .home-row-title, .seen .saved-thumb, .seen .saved-title { opacity: .5; transition: opacity var(--transition-fast); }
+  .seen:hover .thumb, .seen:focus-visible .thumb, .seen:hover .pmedia, .seen:focus-visible .pmedia, .seen:hover .title, .seen:focus-visible .title, .seen:hover .ptext, .seen:focus-visible .ptext, .seen:hover .home-row-thumb, .seen:focus-visible .home-row-thumb, .seen:hover .home-row-title, .seen:focus-visible .home-row-title, .seen:hover .saved-thumb, .seen:focus-visible .saved-thumb, .seen:hover .saved-title, .seen:focus-visible .saved-title { opacity: 1; }
   .thumb-wrap { position: relative; }
   .thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: var(--bg); }
   .grid.shorts .thumb, .trend-card.shorts .thumb { aspect-ratio: 9/13; }
@@ -283,6 +287,7 @@
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
   <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
   <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.3 20.3 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.45 10.45 0 0 1 12 4c7 0 11 8 11 8a20.42 20.42 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></symbol>
   <symbol id="i-external" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
@@ -298,6 +303,7 @@
     <button id="searchBtn" type="submit" aria-label="유튜브 검색"><svg class="icon icon-sm"><use href="#i-search"/></svg> 검색</button>
   </form>
   <button id="refreshBtn" aria-label="현재 탭 새로고침"><svg class="icon icon-sm"><use href="#i-refresh"/></svg> 새로고침</button>
+  <button id="clearSeenBtn" type="button" aria-label="본 항목 표시 지우기"><svg class="icon icon-md"><use href="#i-eye-off"/></svg></button>
   <div id="updated"></div>
 </header>
 
@@ -427,9 +433,13 @@ const VIEWS = [
 const state = { tab: 'home', category: '전체', period: 'week', categories: ['전체'], search: '' };
 const loadedViews = new Set();
 const viewElementIds = [...new Set(VIEWS.map(v => v.elementId))];
+const DEFAULT_HASH_STATE = { tab: 'home', category: '전체', period: 'week', search: '' };
+const SEEN_STORAGE_KEY = 'trend-viewer:seen:v1';
+const SEEN_LIMIT = 800;
 let accountManagers = {};
 let sortMenus = {};
 let savedByUrl = new Map();
+let seenIds = loadSeenIds();
 
 const fmt = n => {
   if (n >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, '') + '억회';
@@ -534,6 +544,7 @@ function setSelectedTab(viewId) {
     t.classList.toggle('active', selected);
     t.setAttribute('aria-selected', selected ? 'true' : 'false');
     if (t.dataset.color) t.style.setProperty('--tab-color', `var(${t.dataset.color})`);
+    if (selected) requestAnimationFrame(() => t.scrollIntoView({ inline: 'nearest', block: 'nearest' }));
   });
 }
 
@@ -572,6 +583,7 @@ function renderTabs() {
     if (next >= 0) {
       e.preventDefault();
       tabBtns[next].focus();
+      tabBtns[next].scrollIntoView({ inline: 'nearest', block: 'nearest' });
       tabBtns[next].click();
     }
   });
@@ -588,7 +600,7 @@ function updateToolbar(view) {
 }
 
 function switchTab(viewId) {
-  const view = VIEWS.find(v => v.id === viewId);
+  const view = VIEWS.find(v => v.id === viewId) || VIEWS[0];
   if (!view) return;
   const previousTab = state.tab;
   state.tab = view.id;
@@ -597,11 +609,70 @@ function switchTab(viewId) {
   });
   setSelectedTab(view.id);
   updateToolbar(view);
+  updateHashState();
   const videoTabChanged = view.elementId === 'videoView' && previousTab !== view.id;
   if (!loadedViews.has(view.id) || videoTabChanged) {
     loadedViews.add(view.id);
     view.load();
   }
+}
+
+function loadSeenIds() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SEEN_STORAGE_KEY) || '[]');
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(id => typeof id === 'string' && id).slice(-SEEN_LIMIT);
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveSeenIds() {
+  localStorage.setItem(SEEN_STORAGE_KEY, JSON.stringify(seenIds));
+}
+
+function markSeen(id) {
+  if (!id) return;
+  seenIds = seenIds.filter(seenId => seenId !== id);
+  seenIds.push(id);
+  if (seenIds.length > SEEN_LIMIT) seenIds = seenIds.slice(-SEEN_LIMIT);
+  saveSeenIds();
+  document.querySelectorAll(`[data-seen-id="${CSS.escape(id)}"]`).forEach(el => el.classList.add('seen'));
+}
+
+function applySeenState(el, id) {
+  if (!id) return;
+  el.dataset.seenId = id;
+  el.classList.toggle('seen', seenIds.includes(id));
+}
+
+function clearSeenState() {
+  seenIds = [];
+  saveSeenIds();
+  document.querySelectorAll('.seen').forEach(el => el.classList.remove('seen'));
+}
+
+function updateHashState() {
+  const params = new URLSearchParams();
+  if (state.tab !== DEFAULT_HASH_STATE.tab) params.set('tab', state.tab);
+  if (state.category !== DEFAULT_HASH_STATE.category) params.set('cat', state.category);
+  if (state.period !== DEFAULT_HASH_STATE.period) params.set('period', state.period);
+  if (state.search) params.set('q', state.search);
+  const query = params.toString();
+  const nextUrl = location.pathname + location.search + (query ? '#' + query : '');
+  history.replaceState(null, '', nextUrl);
+}
+
+function restoreHashState() {
+  const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  state.category = params.get('cat') || DEFAULT_HASH_STATE.category;
+  const period = params.get('period') || DEFAULT_HASH_STATE.period;
+  state.period = ['day', 'week', 'month'].includes(period) ? period : DEFAULT_HASH_STATE.period;
+  state.search = params.get('q') || DEFAULT_HASH_STATE.search;
+  document.getElementById('searchInput').value = state.search;
+  document.querySelectorAll('.period').forEach(p => p.classList.toggle('active', p.dataset.period === state.period));
+  const tab = params.get('tab') || DEFAULT_HASH_STATE.tab;
+  return VIEWS.some(v => v.id === tab) ? tab : DEFAULT_HASH_STATE.tab;
 }
 
 function invalidateVideoViews() {
@@ -630,6 +701,7 @@ function renderChips() {
       document.getElementById('searchInput').value = '';
       invalidateVideoViews();
       loadedViews.add(state.tab);
+      updateHashState();
       renderChips(); loadVideos();
     };
     box.appendChild(b);
@@ -645,15 +717,20 @@ function setBookmarkDataset(el, bookmarkData) {
   });
 }
 
-function wireCardAction(el, onClick) {
+function wireCardAction(el, onClick, seenId = '') {
   if (typeof onClick !== 'function') return;
+  applySeenState(el, seenId);
+  const activate = e => {
+    markSeen(seenId);
+    onClick(e);
+  };
   el.tabIndex = 0;
   el.setAttribute('role', 'button');
-  el.addEventListener('click', onClick);
+  el.addEventListener('click', activate);
   el.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onClick(e);
+      activate(e);
     }
   });
 }
@@ -749,13 +826,13 @@ function renderMetaItems(container, metaItems, variant) {
   });
 }
 
-function createTrendCard({ thumbnail, rank, title, subtitle, metaItems, onClick, variant = 'video', bookmarkData }) {
+function createTrendCard({ thumbnail, rank, title, subtitle, metaItems, onClick, variant = 'video', bookmarkData, seenId }) {
   const el = document.createElement('article');
   el.className = `trend-card ${variant}`;
   if (variant === 'text') el.classList.add('postcard');
   else el.classList.add('card');
   setBookmarkDataset(el, bookmarkData);
-  wireCardAction(el, onClick);
+  wireCardAction(el, onClick, seenId || bookmarkData?.url || bookmarkData?.id || '');
   const bookmarkBtn = createBookmarkButton(bookmarkData);
 
   if (variant === 'text') {
@@ -963,6 +1040,13 @@ function closePlayer() {
 }
 document.getElementById('closeModal').onclick = closePlayer;
 document.getElementById('modal').onclick = e => { if (e.target.id === 'modal') closePlayer(); };
+
+function isEditableTarget(target) {
+  return target instanceof HTMLElement && (
+    target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+  );
+}
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('modal').classList.contains('open')) {
@@ -970,6 +1054,20 @@ document.addEventListener('keydown', e => {
       return;
     }
     closeSortMenus();
+    return;
+  }
+  if (e.metaKey || e.ctrlKey || e.altKey || isEditableTarget(e.target)) return;
+  if (e.key === '/') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+    return;
+  }
+  if (/^[1-9]$/.test(e.key)) {
+    const view = VIEWS[Number(e.key) - 1];
+    if (view) {
+      e.preventDefault();
+      switchTab(view.id);
+    }
   }
 });
 
@@ -1379,7 +1477,7 @@ function savedCard(item) {
   const meta = sourceMeta(item.source);
   const card = document.createElement('article');
   card.className = 'saved-card';
-  wireCardAction(card, () => openSavedItem(item));
+  wireCardAction(card, () => openSavedItem(item), item.url || item.id || '');
   const thumb = proxiedThumb(item.thumbnail);
   if (thumb) {
     const img = document.createElement('img');
@@ -1473,12 +1571,14 @@ function aiHomeItems(data) {
     title: n.title,
     meta: [firstNonEmpty(n.source, n.region), timeAgo(n.ts)].filter(Boolean),
     url: n.link,
+    seenId: n.link,
   }));
   if (news.length) return news;
   return [...(data.models?.trending || []), ...(data.models?.latest || [])].slice(0, 5).map(m => ({
     title: m.id,
     meta: [m.pipeline, `좋아요 ${fmt2(m.likes)}`, `다운로드 ${fmt2(m.downloads)}`],
     url: 'https://huggingface.co/' + m.id,
+    seenId: 'https://huggingface.co/' + m.id,
   }));
 }
 
@@ -1490,6 +1590,8 @@ function homeItems(section, data) {
       meta: [fmt(v.views), v.channel, v.published].filter(Boolean),
       hot: fmt(v.views),
       onClick: () => openPlayer(v.id, section.key === 'shorts'),
+      url: `https://www.youtube.com/watch?v=${v.id}`,
+      seenId: `https://www.youtube.com/watch?v=${v.id}`,
       vertical: section.key === 'shorts',
     }));
   }
@@ -1502,6 +1604,7 @@ function homeItems(section, data) {
       meta: [`조회수 ${fmt2(p.views)}`, p.account ? `@${p.account}` : '', `좋아요 ${fmt2(p.likes)}`].filter(Boolean),
       hot: `조회수 ${fmt2(p.views)}`,
       url: p.url,
+      seenId: p.url,
       vertical: true,
     }));
   }
@@ -1513,6 +1616,7 @@ function homeItems(section, data) {
       meta: [p.account ? `@${p.account}` : '', `좋아요 ${fmt2(p.likes)}`, `댓글 ${fmt2(p.replies)}`, `공유 ${fmt2(reposts)}`].filter(Boolean),
       hot: `좋아요 ${fmt2(p.likes)}`,
       url: p.url,
+      seenId: p.url,
     };
   });
 }
@@ -1523,7 +1627,7 @@ function createHomeRow(item, rank, section) {
   row.style.setProperty('--home-color', `var(${section.color})`);
   wireCardAction(row, item.onClick || (() => {
     if (item.url) window.open(item.url, '_blank');
-  }));
+  }), item.seenId || item.url || '');
 
   if (item.thumbnail) {
     const img = document.createElement('img');
@@ -1800,6 +1904,7 @@ document.getElementById('periods').onclick = e => {
   document.querySelectorAll('.period').forEach(p => p.classList.toggle('active', p === btn));
   invalidateVideoViews();
   loadedViews.add(state.tab);
+  updateHashState();
   loadVideos();
 };
 /* ---------- 검색 ---------- */
@@ -1815,6 +1920,7 @@ document.getElementById('searchForm').addEventListener('submit', e => {
   }
   loadedViews.add(state.tab);
   renderChips();
+  updateHashState();
   loadVideos();
 });
 
@@ -1825,11 +1931,13 @@ document.getElementById('refreshBtn').onclick = () => {
     view.load(true);
   }
 };
+document.getElementById('clearSeenBtn').onclick = clearSeenState;
 
 renderTabs();
 initAccountManagers();
 initSortMenus();
-Promise.all([initCategories(), initSaved()]).then(() => switchTab('home'));
+const restoredTab = restoreHashState();
+Promise.all([initCategories(), initSaved()]).then(() => switchTab(restoredTab));
 </script>
 </body>
 </html>
