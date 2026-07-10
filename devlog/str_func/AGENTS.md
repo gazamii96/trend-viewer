@@ -14,4 +14,5 @@ Update the matching doc whenever its module changes.
 | `tiktok.md` | `src/tiktok/` | pending |
 | `ai_news.md` | `src/ai_news/` | pending |
 | `date.md` | `src/date/` | done — date radar automation |
+| analysis.md | src/analysis/ | done — luna 분석 엔진 |
 | `frontend.md` | `src/frontend/` | pending |
