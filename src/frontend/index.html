@@ -44,6 +44,7 @@
     --c-trends: #22c55e;
     --c-analysis: #a78bfa;
     --c-date: #ff8fab;
+    --c-meta: #0866ff;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { scrollbar-width: thin; scrollbar-color: var(--surface-3) transparent; }
@@ -171,6 +172,18 @@
   .addbar input { flex: 1; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; transition: border-color var(--transition), background-color var(--transition); }
   .addbar button { background: var(--accent2); border: none; border-radius: 8px; padding: 10px 18px; color: #fff; font-weight: 700; cursor: pointer; transition: transform var(--transition-fast), background-color var(--transition); }
   .note { color: var(--muted); font-size: 12.5px; margin-bottom: 18px; line-height: 1.6; }
+
+  .adsearch { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .adsearch input[type="search"] { flex: 1 1 220px; min-width: 0; padding: 9px 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text); font-size: 14px; transition: border-color var(--transition); }
+  .adsearch input[type="search"]:focus { outline: none; border-color: var(--accent2); }
+  .adsearch select { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text); font-size: 13px; cursor: pointer; }
+  .adsearch .adsearch-btn { padding: 8px 18px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform var(--transition-fast); }
+  .adsearch .adsearch-btn:hover { transform: translateY(-1px); }
+  #adsPages { margin-bottom: 6px; }
+  .ads-more { display: flex; justify-content: center; margin: 22px 0 8px; }
+  .ads-more button { padding: 11px 30px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer; transition: background-color var(--transition), border-color var(--transition), transform var(--transition-fast); }
+  .ads-more button:hover:not(:disabled) { border-color: var(--border-hover); background: var(--surface-3); transform: translateY(-1px); }
+  .ads-more button:disabled { opacity: .6; cursor: default; }
   .bookmark-toggle { position: absolute; top: 8px; right: 8px; z-index: 4; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 8px; background: rgba(15,17,21,.78); color: var(--text-secondary); cursor: pointer; opacity: .55; transition: opacity var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast); }
   .bookmark-toggle:hover, .bookmark-toggle:focus-visible, .trend-card:hover .bookmark-toggle { opacity: 1; }
   .bookmark-toggle:active { transform: scale(.96); }
@@ -380,6 +393,7 @@
   <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
   <symbol id="i-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
   <symbol id="i-chevron-right" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+  <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
 </svg>
 <a href="#main" class="skip-link">본문으로 건너뛰기</a>
 <header>
@@ -515,6 +529,40 @@
     <div class="grid shorts" id="ttGrid"></div>
   </div>
 
+  <div id="metaAdsView" class="ext-section" style="display:none">
+    <p class="note"><svg class="icon icon-sm" style="color:var(--c-meta)"><use href="#i-megaphone"/></svg> Meta 광고 라이브러리(공개 투명성 페이지)에서 키워드나 페이지 이름으로 집행 중인 광고를 검색해 레퍼런스로 모아봅니다. 로그인 없이 검색 첫 페이지(최대 30건)를 가져오며, 아래 페이지 칩을 누르면 해당 광고주의 광고만 모아볼 수 있습니다.</p>
+    <form id="adsForm" class="adsearch">
+      <input id="adsQuery" type="search" placeholder="키워드 또는 페이지 이름 (예: 방치형 RPG, 퍼즐 게임)" autocomplete="off" aria-label="광고 검색어">
+      <select id="adsCountry" aria-label="국가">
+        <option value="KR" selected>한국</option>
+        <option value="US">미국</option>
+        <option value="JP">일본</option>
+        <option value="TW">대만</option>
+        <option value="ALL">전체 국가</option>
+      </select>
+      <select id="adsActive" aria-label="게재 상태">
+        <option value="active" selected>게재 중</option>
+        <option value="inactive">종료됨</option>
+        <option value="all">전체</option>
+      </select>
+      <select id="adsMedia" aria-label="미디어 형식">
+        <option value="all" selected>모든 형식</option>
+        <option value="video">영상</option>
+        <option value="image">이미지</option>
+      </select>
+      <button type="submit" class="adsearch-btn">검색</button>
+    </form>
+    <div class="chips" id="adsPages" style="display:none"></div>
+    <div class="sortbar">
+      <span class="sortcount" id="adsCount"></span>
+    </div>
+    <div class="status" id="adsStatus"></div>
+    <div class="grid" id="adsGrid"></div>
+    <div class="ads-more" id="adsMore" style="display:none">
+      <button type="button" id="adsMoreBtn">더 보기</button>
+    </div>
+  </div>
+
   <div id="savedView" style="display:none">
     <div class="status cache-age" id="savedStatus"></div>
     <div class="saved-grid" id="savedGrid"></div>
@@ -544,6 +592,7 @@ const VIEWS = [
   { id: 'x', label: 'X', svgIcon: 'i-x-logo', color: '--c-x', elementId: 'xView', load: (f) => loadSocial('x', f), toolbar: 'accounts', hasForce: true },
   { id: 'threads', label: '스레드', svgIcon: 'i-threads', color: '--c-threads', elementId: 'threadsView', load: (f) => loadSocial('threads', f), toolbar: 'accounts', hasForce: true },
   { id: 'tiktok', label: '틱톡', svgIcon: 'i-tiktok', color: '--c-tiktok', elementId: 'tiktokView', load: (f) => loadTikTok(f), toolbar: 'accounts', hasForce: true },
+  { id: 'meta_ads', label: '광고', svgIcon: 'i-megaphone', color: '--c-meta', elementId: 'metaAdsView', load: (f) => loadMetaAds(f), toolbar: 'none', hasForce: true },
   { id: 'saved', label: '저장됨', svgIcon: 'i-bookmark', color: '--accent', elementId: 'savedView', load: () => renderSaved(), toolbar: 'none' },
 ];
 const FILLED_PLATFORM_ICONS = new Set(['i-youtube', 'i-shorts', 'i-instagram', 'i-x-logo', 'i-threads', 'i-tiktok']);
@@ -2022,6 +2071,7 @@ const SOURCE_META = {
   x: { label: 'X', color: '--c-x' },
   threads: { label: '스레드', color: '--c-threads' },
   tiktok: { label: '틱톡', color: '--c-tiktok' },
+  meta_ads: { label: '광고', color: '--c-meta' },
 };
 
 function sourceMeta(source) {
@@ -2546,6 +2596,210 @@ function renderTikTok() {
   sorted.forEach((t, i) => grid.appendChild(postCard(t, i + 1, 'tiktok')));
   setSortCount(document.getElementById('ttCount'), `${label[f]} 기준 · 총 ${sorted.length}개`, tiktokMeta);
 }
+
+/* ---------- Meta 광고 탭 (광고 라이브러리) ---------- */
+const metaAdsState = { query: '', type: 'keyword', pageId: '', pageName: '', totalCount: 0, cursor: '', hasMore: false, loaded: 0, seen: new Set(), loading: false };
+const AD_PLATFORM_SHORT = { FACEBOOK: 'FB', INSTAGRAM: 'IG', AUDIENCE_NETWORK: 'AN', MESSENGER: 'MSG', THREADS: '스레드', OCULUS: 'VR' };
+
+function adsSearchParams() {
+  const q = metaAdsState.type === 'page' ? metaAdsState.pageId : metaAdsState.query;
+  return new URLSearchParams({
+    q,
+    type: metaAdsState.type,
+    country: document.getElementById('adsCountry').value,
+    status: document.getElementById('adsActive').value,
+    media: document.getElementById('adsMedia').value,
+  });
+}
+
+function updateAdsCount() {
+  const label = metaAdsState.type === 'page'
+    ? metaAdsState.pageName || '페이지'
+    : `'${metaAdsState.query}'`;
+  const totalText = metaAdsState.totalCount
+    ? `전체 약 ${fmt2(metaAdsState.totalCount)}건 중 ${metaAdsState.loaded}건`
+    : `${metaAdsState.loaded}건`;
+  setSortCount(document.getElementById('adsCount'), `${label} · ${totalText}`, null);
+}
+
+function renderAdsMore() {
+  const wrap = document.getElementById('adsMore');
+  const btn = document.getElementById('adsMoreBtn');
+  wrap.style.display = metaAdsState.hasMore ? 'flex' : 'none';
+  btn.disabled = metaAdsState.loading;
+  btn.textContent = metaAdsState.loading ? '불러오는 중…' : '더 보기';
+}
+
+function appendAds(ads) {
+  const grid = document.getElementById('adsGrid');
+  ads.forEach(ad => {
+    if (metaAdsState.seen.has(ad.id)) return;
+    metaAdsState.seen.add(ad.id);
+    metaAdsState.loaded += 1;
+    grid.appendChild(adCard(ad, metaAdsState.loaded));
+  });
+}
+
+function adDateText(ts) {
+  if (!ts) return '';
+  return new Date(ts * 1000).toLocaleDateString('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric' });
+}
+
+function adCard(ad, rank) {
+  const metaItems = [
+    { label: '', value: ad.isActive ? '게재 중' : '종료', className: ad.isActive ? 'views' : '' },
+  ];
+  if (ad.startDate) metaItems.push({ label: '시작', value: adDateText(ad.startDate) });
+  if (ad.platforms && ad.platforms.length) {
+    metaItems.push({ label: '', value: ad.platforms.map(p => AD_PLATFORM_SHORT[p] || p).slice(0, 4).join('·') });
+  }
+  if (ad.collationCount > 1) metaItems.push({ label: '유사 소재', value: `${ad.collationCount}개` });
+  const title = [ad.title, ad.body].filter(Boolean).join(' — ') || ad.pageName;
+  const subtitle = ad.pageName + (ad.ctaText ? ` · ${ad.ctaText}` : '');
+  return createTrendCard({
+    thumbnail: ad.thumbnail ? `/api/img?u=${encodeURIComponent(ad.thumbnail)}` : '',
+    rank,
+    title,
+    subtitle,
+    metaItems,
+    onClick: () => window.open(ad.url, '_blank'),
+    bookmarkData: {
+      source: 'meta_ads',
+      id: ad.id,
+      title,
+      url: ad.url,
+      thumbnail: ad.thumbnail,
+    },
+  });
+}
+
+function renderAdPages(pages) {
+  const box = document.getElementById('adsPages');
+  box.innerHTML = '';
+  if (metaAdsState.type === 'page') {
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'chip active';
+    back.textContent = `${metaAdsState.pageName || '페이지'} 광고만 보는 중 · 키워드 결과로 ←`;
+    back.onclick = () => {
+      metaAdsState.type = 'keyword';
+      metaAdsState.pageId = '';
+      metaAdsState.pageName = '';
+      loadMetaAds();
+    };
+    box.appendChild(back);
+  } else {
+    (pages || []).forEach(p => {
+      if (!p.pageId) return;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = `${p.pageName || p.pageId} (${p.count})`;
+      b.title = '이 페이지의 광고만 모아보기';
+      b.onclick = () => {
+        metaAdsState.type = 'page';
+        metaAdsState.pageId = p.pageId;
+        metaAdsState.pageName = p.pageName || p.pageId;
+        loadMetaAds();
+      };
+      box.appendChild(b);
+    });
+  }
+  box.style.display = box.children.length ? 'flex' : 'none';
+}
+
+async function loadMetaAds(force = false) {
+  const status = document.getElementById('adsStatus');
+  const grid = document.getElementById('adsGrid');
+  const q = metaAdsState.type === 'page' ? metaAdsState.pageId : metaAdsState.query;
+  resetStatus(status);
+  document.getElementById('adsMore').style.display = 'none';
+  metaAdsState.cursor = '';
+  metaAdsState.hasMore = false;
+  metaAdsState.loaded = 0;
+  metaAdsState.seen = new Set();
+  if (!q) {
+    grid.className = 'grid';
+    grid.innerHTML = '';
+    document.getElementById('adsPages').style.display = 'none';
+    setSortCount(document.getElementById('adsCount'), '', null);
+    showEmpty(status, '검색어를 입력하세요', '키워드(예: 방치형 RPG)나 광고주 페이지 이름으로 Meta 광고 라이브러리를 검색합니다.');
+    return;
+  }
+  status.style.display = 'none';
+  showSkeleton(grid, 8);
+  try {
+    const params = adsSearchParams();
+    if (force) params.set('force', '1');
+    const res = await fetch('/api/meta_ads?' + params.toString());
+    if (!res.ok) throw new Error(`meta_ads ${res.status}`);
+    const data = await res.json();
+    document.getElementById('updated').textContent =
+      '업데이트: ' + new Date(data.fetchedAt * 1000).toLocaleTimeString('ko-KR');
+    renderAdPages(data.pages);
+    clearSkeleton(grid, 'grid');
+    metaAdsState.totalCount = data.totalCount || 0;
+    metaAdsState.cursor = data.cursor || '';
+    metaAdsState.hasMore = Boolean(data.hasMore && data.cursor);
+    if (!data.ads || !data.ads.length) {
+      setSortCount(document.getElementById('adsCount'), '', data);
+      if (isFeedErrorStatus(data)) showFeedContractError(status, data);
+      else showEmpty(status, '광고를 찾지 못했습니다', '다른 키워드나 국가·게재 상태 필터로 다시 시도해 보세요.');
+      return;
+    }
+    appendAds(data.ads);
+    updateAdsCount();
+    renderAdsMore();
+  } catch (e) {
+    clearSkeleton(grid, 'grid');
+    showError(status, 'Meta 광고');
+  }
+}
+
+async function loadMoreAds() {
+  if (metaAdsState.loading || !metaAdsState.hasMore || !metaAdsState.cursor) return;
+  metaAdsState.loading = true;
+  renderAdsMore();
+  try {
+    const params = adsSearchParams();
+    params.set('cursor', metaAdsState.cursor);
+    const res = await fetch('/api/meta_ads?' + params.toString());
+    if (!res.ok) throw new Error(`meta_ads ${res.status}`);
+    const data = await res.json();
+    metaAdsState.cursor = data.cursor || '';
+    metaAdsState.hasMore = Boolean(data.hasMore && data.cursor);
+    appendAds(data.ads || []);
+    updateAdsCount();
+    if (!data.ads || !data.ads.length) {
+      metaAdsState.hasMore = false;
+      if (isFeedErrorStatus(data)) {
+        const status = document.getElementById('adsStatus');
+        showFeedContractError(status, data);
+      }
+    }
+  } catch (e) {
+    metaAdsState.hasMore = false;
+  } finally {
+    metaAdsState.loading = false;
+    renderAdsMore();
+  }
+}
+
+document.getElementById('adsForm').addEventListener('submit', e => {
+  e.preventDefault();
+  metaAdsState.query = document.getElementById('adsQuery').value.trim();
+  metaAdsState.type = 'keyword';
+  metaAdsState.pageId = '';
+  metaAdsState.pageName = '';
+  loadedViews.add('meta_ads');
+  loadMetaAds();
+});
+document.getElementById('adsMoreBtn').addEventListener('click', loadMoreAds);
+['adsCountry', 'adsActive', 'adsMedia'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    if (metaAdsState.type === 'page' ? metaAdsState.pageId : metaAdsState.query) loadMetaAds();
+  });
+});
 
 /* ---------- 초기화 ---------- */
 function initAccountManagers() {

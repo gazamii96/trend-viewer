@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urlparse
 from ai_news import ai_news_tool
 from analysis import synthesis_tool
 from date import date_tool
+from meta_ads import meta_ads_tool
 from settings import BASE_DIR, CACHE_TTL, PORT
 from shared import accounts_tool, img_proxy_tool, saved_items_tool
 from reels import reels_tool
@@ -132,6 +133,37 @@ class Handler(BaseHTTPRequestHandler):
         data, fetched_at, cache_ttl = synthesis_tool.get_analysis(country, force)
         self._send(200, {**data, "country": country, "fetchedAt": fetched_at, "cacheTtl": cache_ttl})
 
+    def _handle_meta_ads(self, qs):
+        force = qs.get("force", ["0"])[0] == "1"
+        query = qs.get("q", [""])[0].strip()
+        if not query:
+            self._send(400, {"error": "missing q"})
+            return
+        country = qs.get("country", ["KR"])[0].upper()
+        if country not in meta_ads_tool.COUNTRIES:
+            country = "KR"
+        search_type = qs.get("type", ["keyword"])[0]
+        if search_type not in meta_ads_tool.SEARCH_TYPES:
+            search_type = "keyword"
+        if search_type == "page" and not query.isdigit():
+            self._send(400, {"error": "page search needs a numeric page id"})
+            return
+        active_status = qs.get("status", ["active"])[0]
+        if active_status not in meta_ads_tool.ACTIVE_STATUSES:
+            active_status = "active"
+        media_type = qs.get("media", ["all"])[0]
+        if media_type not in meta_ads_tool.MEDIA_TYPES:
+            media_type = "all"
+        cursor = qs.get("cursor", [""])[0].strip() or None
+        data, fetched_at, errors, cache_ttl = meta_ads_tool.get_meta_ads(
+            query, country, search_type, active_status, media_type, force, cursor
+        )
+        self._send(200, {**data, "query": query, "country": country,
+                         "searchType": search_type, "fetchedAt": fetched_at,
+                         "cacheTtl": cache_ttl,
+                         "status": _feed_status(data["ads"], errors),
+                         "errors": errors})
+
     def _handle_oembed(self, qs):
         self._send(200, ai_news_tool.fetch_oembed(qs.get("url", [""])[0]))
 
@@ -163,6 +195,7 @@ class Handler(BaseHTTPRequestHandler):
             "/api/x": self._handle_x,
             "/api/threads": self._handle_threads,
             "/api/ai": self._handle_ai,
+            "/api/meta_ads": self._handle_meta_ads,
             "/api/date": self._handle_date,
             "/api/analysis": self._handle_analysis,
             "/api/oembed": self._handle_oembed,
