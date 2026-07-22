@@ -394,5 +394,116 @@ class GetMetaAdsTest(unittest.TestCase):
         self.assertEqual(run.call_count, first)
 
 
+class WatchlistTest(unittest.TestCase):
+    def setUp(self):
+        cache_tool._cache.clear()
+        self._file = "meta_ads_watchlist_test.json"
+        wl_patch = mock.patch("meta_ads.meta_ads_tool._WATCHLIST_CONFIG", self._file)
+        wl_patch.start()
+        self.addCleanup(wl_patch.stop)
+        mk = mock.patch("meta_ads.meta_ads_tool.os.makedirs")
+        mk.start()
+        self.addCleanup(mk.stop)
+        self._store = {"items": []}
+
+        def fake_open(path, *a, **k):
+            import io
+            mode = a[0] if a else k.get("mode", "r")
+            if "w" in mode:
+                buf = io.StringIO()
+                orig_close = buf.close
+
+                def close():
+                    self._store["items"] = json.loads(buf.getvalue())
+                    orig_close()
+                buf.close = close
+                return buf
+            return io.StringIO(json.dumps(self._store["items"]))
+
+        op = mock.patch("builtins.open", side_effect=fake_open)
+        op.start()
+        self.addCleanup(op.stop)
+
+    def tearDown(self):
+        cache_tool._cache.clear()
+
+    def test_add_and_remove(self):
+        items = meta_ads_tool.update_watchlist("add", "900", "메이플 키우기")
+        self.assertEqual(items, [{"pageId": "900", "pageName": "메이플 키우기"}])
+        # duplicate add is ignored
+        items = meta_ads_tool.update_watchlist("add", "900", "메이플 키우기")
+        self.assertEqual(len(items), 1)
+        items = meta_ads_tool.update_watchlist("add", "901", "픽셀 법사")
+        self.assertEqual(len(items), 2)
+        items = meta_ads_tool.update_watchlist("remove", "900")
+        self.assertEqual([i["pageId"] for i in items], ["901"])
+
+    def test_add_rejects_non_numeric(self):
+        items = meta_ads_tool.update_watchlist("add", "not-a-page", "x")
+        self.assertEqual(items, [])
+
+    def test_dashboard_summarizes_pages(self):
+        self._store["items"] = [{"pageId": "900", "pageName": "A"}]
+        now = 1_000_000_000
+        # 1 ad running 100 days (long-run, video), 1 running 3 days (new, image)
+        old_ad = _raw_ad("1", page_id="900", page_name="A",
+                         start_date=now - 100 * 86400)
+        new_ad = _raw_ad("2", page_id="900", page_name="A",
+                         start_date=now - 3 * 86400)
+        new_ad["snapshot"]["videos"] = []
+        new_ad["snapshot"]["display_format"] = "IMAGE"
+        old_ad["snapshot"]["display_format"] = "VIDEO"
+        html = _search_html([old_ad, new_ad], count=57)
+        with mock.patch("meta_ads.meta_ads_tool.subprocess.run",
+                        return_value=_curl_result(200, html)), \
+             mock.patch("meta_ads.meta_ads_tool.time.time", return_value=now):
+            data, _, _ = meta_ads_tool.get_watchlist_dashboard("KR", False)
+        self.assertEqual(len(data["rows"]), 1)
+        row = data["rows"][0]
+        self.assertEqual(row["totalCount"], 57)
+        self.assertEqual(row["newThisWeek"], 1)
+        self.assertEqual(row["longRun"], 1)
+        self.assertEqual(row["longestDays"], 100)
+        self.assertEqual(row["videoShare"], 50)
+        self.assertEqual(row["topAd"]["days"], 100)
+
+
+class AssetTest(unittest.TestCase):
+    def test_rejects_non_fbcdn_host(self):
+        status, ctype, body, name = meta_ads_tool.fetch_asset("https://evil.test/x.mp4")
+        self.assertEqual(status, 400)
+        self.assertEqual(name, "")
+
+    def test_rejects_non_https(self):
+        status, *_ = meta_ads_tool.fetch_asset("http://video.xx.fbcdn.net/x.mp4")
+        self.assertEqual(status, 400)
+
+    def test_downloads_video(self):
+        with mock.patch("meta_ads.meta_ads_tool.subprocess.run",
+                        return_value=mock.Mock(returncode=0, stdout=b"\x00\x01video")):
+            status, ctype, body, name = meta_ads_tool.fetch_asset(
+                "https://video-icn2-1.xx.fbcdn.net/v/t42/clip.mp4?x=1")
+        self.assertEqual(status, 200)
+        self.assertEqual(ctype, "video/mp4")
+        self.assertTrue(name.endswith(".mp4"))
+        self.assertEqual(body, b"\x00\x01video")
+
+    def test_downloads_image(self):
+        with mock.patch("meta_ads.meta_ads_tool.subprocess.run",
+                        return_value=mock.Mock(returncode=0, stdout=b"jpegbytes")):
+            status, ctype, body, name = meta_ads_tool.fetch_asset(
+                "https://scontent-icn2-1.xx.fbcdn.net/v/t39/pic.jpg?x=1")
+        self.assertEqual(status, 200)
+        self.assertEqual(ctype, "image/jpeg")
+        self.assertTrue(name.endswith(".jpg"))
+
+    def test_fetch_failure_returns_502(self):
+        with mock.patch("meta_ads.meta_ads_tool.subprocess.run",
+                        return_value=mock.Mock(returncode=6, stdout=b"")):
+            status, *_ = meta_ads_tool.fetch_asset(
+                "https://video.xx.fbcdn.net/clip.mp4")
+        self.assertEqual(status, 502)
+
+
 if __name__ == "__main__":
     unittest.main()

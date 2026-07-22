@@ -184,6 +184,48 @@
   .ads-more button { padding: 11px 30px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer; transition: background-color var(--transition), border-color var(--transition), transform var(--transition-fast); }
   .ads-more button:hover:not(:disabled) { border-color: var(--border-hover); background: var(--surface-3); transform: translateY(-1px); }
   .ads-more button:disabled { opacity: .6; cursor: default; }
+  .ads-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 12px; }
+  .ads-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .ads-seg button { padding: 7px 15px; border: none; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; transition: background-color var(--transition), color var(--transition); }
+  .ads-seg button.active { background: var(--c-meta); color: #fff; }
+  .ads-filter { padding: 7px 15px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-1); color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; transition: background-color var(--transition), border-color var(--transition), color var(--transition); }
+  .ads-filter[aria-pressed="true"] { background: var(--warning); border-color: var(--warning); color: #1a1205; }
+  .ads-insight { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .ads-insight .card2 { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; }
+  .ads-insight .card2 h4 { font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 9px; text-transform: uppercase; letter-spacing: .02em; }
+  .ads-bar { display: flex; align-items: center; gap: 8px; font-size: 12.5px; margin-bottom: 6px; }
+  .ads-bar .lab { flex: 0 0 auto; min-width: 58px; color: var(--text-secondary); }
+  .ads-bar .track { flex: 1; height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+  .ads-bar .fill { height: 100%; border-radius: 999px; background: var(--c-meta); }
+  .ads-bar .val { flex: 0 0 auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .ads-hooks { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ads-hooks .hook { padding: 4px 10px; border-radius: 999px; background: var(--surface-3); font-size: 12px; color: var(--text-secondary); }
+  .saved-note { margin-top: 6px; font-size: 12px; color: var(--muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .ads-longbadge { position: absolute; top: 8px; left: 8px; z-index: 2; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; background: rgba(245,158,11,.92); color: #1a1205; }
+  .ads-longbadge.hot { background: rgba(239,68,68,.92); color: #fff; }
+  .ads-dl { position: absolute; top: 8px; right: 46px; z-index: 2; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: rgba(15,17,21,.62); color: #fff; cursor: pointer; transition: background-color var(--transition-fast); }
+  .ads-dl:hover { background: rgba(15,17,21,.85); }
+  .ads-watch { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 15px 17px; margin-bottom: 18px; }
+  .ads-watch-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .ads-watch-head h2 { font-size: 15px; }
+  .ads-mini-btn { padding: 6px 13px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 12.5px; cursor: pointer; }
+  .ads-mini-btn:hover { border-color: var(--border-hover); }
+  .ads-watch-table { display: flex; flex-direction: column; gap: 8px; }
+  .ads-watch-row { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr) auto; gap: 10px; align-items: center; padding: 11px 13px; border-radius: 10px; background: var(--surface-2); font-size: 13px; }
+  .ads-watch-row.head { background: transparent; padding: 0 13px; color: var(--muted); font-size: 11.5px; font-weight: 700; text-transform: uppercase; }
+  .ads-watch-name { display: flex; align-items: center; gap: 9px; font-weight: 700; min-width: 0; }
+  .ads-watch-name img { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto; }
+  .ads-watch-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ads-watch-row .metric { font-variant-numeric: tabular-nums; }
+  .ads-watch-row .metric b { color: var(--c-meta); }
+  .ads-watch-row .metric .new { color: var(--warning); }
+  .ads-watch-del { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 12px; }
+  .ads-watch-del:hover { color: var(--danger); }
+  @media (max-width: 720px) {
+    .ads-watch-row { grid-template-columns: 1fr auto; gap: 4px 10px; }
+    .ads-watch-row.head { display: none; }
+    .ads-watch-row .metric { font-size: 12px; color: var(--text-secondary); }
+  }
   .bookmark-toggle { position: absolute; top: 8px; right: 8px; z-index: 4; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 8px; background: rgba(15,17,21,.78); color: var(--text-secondary); cursor: pointer; opacity: .55; transition: opacity var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast); }
   .bookmark-toggle:hover, .bookmark-toggle:focus-visible, .trend-card:hover .bookmark-toggle { opacity: 1; }
   .bookmark-toggle:active { transform: scale(.96); }
@@ -552,7 +594,20 @@
       </select>
       <button type="submit" class="adsearch-btn">검색</button>
     </form>
+    <div class="ads-watch" id="adsWatch" style="display:none">
+      <div class="ads-watch-head">
+        <h2><svg class="icon icon-sm" style="color:var(--c-meta)"><use href="#i-user"/></svg> 경쟁사 워치리스트</h2>
+        <button type="button" id="adsWatchRefresh" class="ads-mini-btn">새로고침</button>
+      </div>
+      <div class="status" id="adsWatchStatus"></div>
+      <div class="ads-watch-table" id="adsWatchTable"></div>
+    </div>
     <div class="chips" id="adsPages" style="display:none"></div>
+    <div class="ads-tools" id="adsTools" style="display:none">
+      <div class="ads-sort" id="adsSort"></div>
+      <button type="button" class="ads-filter" id="adsLongRun" aria-pressed="false">30일+ 롱런만</button>
+    </div>
+    <div class="ads-insight" id="adsInsight" style="display:none"></div>
     <div class="sortbar">
       <span class="sortcount" id="adsCount"></span>
     </div>
@@ -592,7 +647,7 @@ const VIEWS = [
   { id: 'x', label: 'X', svgIcon: 'i-x-logo', color: '--c-x', elementId: 'xView', load: (f) => loadSocial('x', f), toolbar: 'accounts', hasForce: true },
   { id: 'threads', label: '스레드', svgIcon: 'i-threads', color: '--c-threads', elementId: 'threadsView', load: (f) => loadSocial('threads', f), toolbar: 'accounts', hasForce: true },
   { id: 'tiktok', label: '틱톡', svgIcon: 'i-tiktok', color: '--c-tiktok', elementId: 'tiktokView', load: (f) => loadTikTok(f), toolbar: 'accounts', hasForce: true },
-  { id: 'meta_ads', label: '광고', svgIcon: 'i-megaphone', color: '--c-meta', elementId: 'metaAdsView', load: (f) => loadMetaAds(f), toolbar: 'none', hasForce: true },
+  { id: 'meta_ads', label: '광고', svgIcon: 'i-megaphone', color: '--c-meta', elementId: 'metaAdsView', load: (f) => loadMetaAdsTab(f), toolbar: 'none', hasForce: true },
   { id: 'saved', label: '저장됨', svgIcon: 'i-bookmark', color: '--accent', elementId: 'savedView', load: () => renderSaved(), toolbar: 'none' },
 ];
 const FILLED_PLATFORM_ICONS = new Set(['i-youtube', 'i-shorts', 'i-instagram', 'i-x-logo', 'i-threads', 'i-tiktok']);
@@ -1039,6 +1094,8 @@ function createBookmarkButton(bookmarkData) {
       title: bookmarkData.title || '',
       url: bookmarkData.url,
       thumbnail: bookmarkData.thumbnail || '',
+      note: bookmarkData.note || '',
+      tags: bookmarkData.tags || [],
     });
   });
   btn.addEventListener('keydown', e => {
@@ -2154,6 +2211,12 @@ function savedCard(item) {
   savedAt.textContent = timeAgo(item.savedAt);
   sub.append(source, savedAt);
   body.append(title, sub);
+  if (item.note) {
+    const note = document.createElement('div');
+    note.className = 'saved-note';
+    note.textContent = item.note;
+    body.appendChild(note);
+  }
   card.append(del, body);
   return card;
 }
@@ -2598,8 +2661,21 @@ function renderTikTok() {
 }
 
 /* ---------- Meta 광고 탭 (광고 라이브러리) ---------- */
-const metaAdsState = { query: '', type: 'keyword', pageId: '', pageName: '', totalCount: 0, cursor: '', hasMore: false, loaded: 0, seen: new Set(), loading: false };
+const metaAdsState = { query: '', type: 'keyword', pageId: '', pageName: '', totalCount: 0, cursor: '', hasMore: false, loading: false, ads: [], seen: new Set(), sort: 'relevance', longRunOnly: false };
 const AD_PLATFORM_SHORT = { FACEBOOK: 'FB', INSTAGRAM: 'IG', AUDIENCE_NETWORK: 'AN', MESSENGER: 'MSG', THREADS: '스레드', OCULUS: 'VR' };
+const AD_LONG_RUN_DAYS = 30;
+const AD_SORTS = [
+  { key: 'relevance', label: '관련순' },
+  { key: 'longest', label: '롱런순' },
+  { key: 'newest', label: '신규순' },
+];
+// 카피 훅 추출용 불용어 — 게임 광고에 흔해 신호가 약한 단어들
+const AD_STOPWORDS = new Set(['게임', '지금', '무료', '다운로드', '설치', '플레이', '바로', '최고', '신작', '오픈', '이벤트', '더', '이', '그', '수', '것', 'the', 'a', 'to', 'now', 'your', 'you', 'and', 'for', 'of', 'in', 'game', 'play', 'free', 'new', 'get', 'download', 'with', 'on']);
+
+function adRunningDays(ad) {
+  if (!ad.startDate) return 0;
+  return Math.max(0, Math.floor(Date.now() / 1000 - ad.startDate) / 86400 | 0);
+}
 
 function adsSearchParams() {
   const q = metaAdsState.type === 'page' ? metaAdsState.pageId : metaAdsState.query;
@@ -2612,42 +2688,16 @@ function adsSearchParams() {
   });
 }
 
-function updateAdsCount() {
-  const label = metaAdsState.type === 'page'
-    ? metaAdsState.pageName || '페이지'
-    : `'${metaAdsState.query}'`;
-  const totalText = metaAdsState.totalCount
-    ? `전체 약 ${fmt2(metaAdsState.totalCount)}건 중 ${metaAdsState.loaded}건`
-    : `${metaAdsState.loaded}건`;
-  setSortCount(document.getElementById('adsCount'), `${label} · ${totalText}`, null);
-}
-
-function renderAdsMore() {
-  const wrap = document.getElementById('adsMore');
-  const btn = document.getElementById('adsMoreBtn');
-  wrap.style.display = metaAdsState.hasMore ? 'flex' : 'none';
-  btn.disabled = metaAdsState.loading;
-  btn.textContent = metaAdsState.loading ? '불러오는 중…' : '더 보기';
-}
-
-function appendAds(ads) {
-  const grid = document.getElementById('adsGrid');
-  ads.forEach(ad => {
-    if (metaAdsState.seen.has(ad.id)) return;
-    metaAdsState.seen.add(ad.id);
-    metaAdsState.loaded += 1;
-    grid.appendChild(adCard(ad, metaAdsState.loaded));
-  });
-}
-
 function adDateText(ts) {
   if (!ts) return '';
   return new Date(ts * 1000).toLocaleDateString('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric' });
 }
 
 function adCard(ad, rank) {
+  const days = adRunningDays(ad);
   const metaItems = [
     { label: '', value: ad.isActive ? '게재 중' : '종료', className: ad.isActive ? 'views' : '' },
+    { label: '', value: `${days}일째`, className: days >= AD_LONG_RUN_DAYS ? 'hot' : '' },
   ];
   if (ad.startDate) metaItems.push({ label: '시작', value: adDateText(ad.startDate) });
   if (ad.platforms && ad.platforms.length) {
@@ -2656,7 +2706,7 @@ function adCard(ad, rank) {
   if (ad.collationCount > 1) metaItems.push({ label: '유사 소재', value: `${ad.collationCount}개` });
   const title = [ad.title, ad.body].filter(Boolean).join(' — ') || ad.pageName;
   const subtitle = ad.pageName + (ad.ctaText ? ` · ${ad.ctaText}` : '');
-  return createTrendCard({
+  const card = createTrendCard({
     thumbnail: ad.thumbnail ? `/api/img?u=${encodeURIComponent(ad.thumbnail)}` : '',
     rank,
     title,
@@ -2669,8 +2719,143 @@ function adCard(ad, rank) {
       title,
       url: ad.url,
       thumbnail: ad.thumbnail,
+      note: [ad.body, ad.ctaText ? `CTA: ${ad.ctaText}` : '', `${days}일째 집행`].filter(Boolean).join(' · '),
+      tags: [ad.pageName, ad.displayFormat, days >= AD_LONG_RUN_DAYS ? '롱런' : ''].filter(Boolean),
     },
   });
+  // 롱런 배지
+  if (days >= AD_LONG_RUN_DAYS) {
+    const badge = document.createElement('div');
+    badge.className = 'ads-longbadge' + (days >= 90 ? ' hot' : '');
+    badge.textContent = days >= 90 ? `🔥 ${days}일 롱런` : `롱런 ${days}일`;
+    badge.title = '오래 집행 중인 소재 = 성과가 검증된 승자일 가능성이 높습니다';
+    card.appendChild(badge);
+  }
+  // 소재 다운로드 (스와이프 파일)
+  const assetUrl = ad.videoUrl || ad.thumbnail;
+  if (assetUrl) {
+    const dl = document.createElement('button');
+    dl.type = 'button';
+    dl.className = 'ads-dl';
+    dl.title = ad.videoUrl ? '광고 영상 다운로드' : '광고 이미지 다운로드';
+    dl.setAttribute('aria-label', '소재 다운로드');
+    dl.innerHTML = '<svg class="icon icon-sm"><use href="#i-download"/></svg>';
+    dl.addEventListener('click', e => {
+      e.stopPropagation();
+      window.open('/api/meta_ads/asset?u=' + encodeURIComponent(assetUrl), '_blank');
+    });
+    card.appendChild(dl);
+  }
+  return card;
+}
+
+function sortedFilteredAds() {
+  let list = metaAdsState.ads.slice();
+  if (metaAdsState.longRunOnly) list = list.filter(a => adRunningDays(a) >= AD_LONG_RUN_DAYS);
+  if (metaAdsState.sort === 'longest') list.sort((a, b) => (b.startDate ? adRunningDays(b) : -1) - (a.startDate ? adRunningDays(a) : -1));
+  else if (metaAdsState.sort === 'newest') list.sort((a, b) => (b.startDate || 0) - (a.startDate || 0));
+  return list;
+}
+
+function renderAdsGrid() {
+  const grid = document.getElementById('adsGrid');
+  grid.className = 'grid';
+  grid.innerHTML = '';
+  const list = sortedFilteredAds();
+  list.forEach((ad, i) => grid.appendChild(adCard(ad, i + 1)));
+  updateAdsCount(list.length);
+  renderAdsInsight();
+  renderAdsMore();
+}
+
+function updateAdsCount(shown) {
+  const label = metaAdsState.type === 'page'
+    ? metaAdsState.pageName || '페이지'
+    : `'${metaAdsState.query}'`;
+  const loaded = metaAdsState.ads.length;
+  const totalText = metaAdsState.totalCount
+    ? `전체 약 ${fmt2(metaAdsState.totalCount)}건 중 ${loaded}건 수집`
+    : `${loaded}건 수집`;
+  const filterText = metaAdsState.longRunOnly ? ` · 롱런 ${shown}건 표시` : '';
+  setSortCount(document.getElementById('adsCount'), `${label} · ${totalText}${filterText}`, null);
+}
+
+function renderAdsMore() {
+  const wrap = document.getElementById('adsMore');
+  const btn = document.getElementById('adsMoreBtn');
+  wrap.style.display = metaAdsState.hasMore ? 'flex' : 'none';
+  btn.disabled = metaAdsState.loading;
+  btn.textContent = metaAdsState.loading ? '불러오는 중…' : '더 보기';
+}
+
+function appendAds(ads) {
+  (ads || []).forEach(ad => {
+    if (metaAdsState.seen.has(ad.id)) return;
+    metaAdsState.seen.add(ad.id);
+    metaAdsState.ads.push(ad);
+  });
+}
+
+/* ----- 크리에이티브 인사이트 ----- */
+function bar(label, value, total) {
+  const pct = total ? Math.round(100 * value / total) : 0;
+  return `<div class="ads-bar"><span class="lab">${label}</span><span class="track"><span class="fill" style="width:${pct}%"></span></span><span class="val">${pct}% (${value})</span></div>`;
+}
+
+function extractHooks(ads) {
+  const counts = new Map();
+  ads.forEach(ad => {
+    // {{product.name}} 등 다이내믹 카탈로그 템플릿 자리표시자는 카피가 아니라 제거
+    const text = `${ad.title || ''} ${ad.body || ''}`.replace(/\{\{.*?\}\}/g, ' ').toLowerCase();
+    const tokens = text.match(/[가-힣]{2,}|[a-z]{3,}/g) || [];
+    new Set(tokens).forEach(t => {
+      if (AD_STOPWORDS.has(t)) return;
+      counts.set(t, (counts.get(t) || 0) + 1);
+    });
+  });
+  return [...counts.entries()].filter(([, c]) => c >= 2).sort((a, b) => b[1] - a[1]).slice(0, 12);
+}
+
+function renderAdsInsight() {
+  const box = document.getElementById('adsInsight');
+  const ads = metaAdsState.ads;
+  if (ads.length < 3) { box.style.display = 'none'; return; }
+  const n = ads.length;
+  const video = ads.filter(a => a.displayFormat === 'VIDEO' || a.videoUrl).length;
+  const longRun = ads.filter(a => adRunningDays(a) >= AD_LONG_RUN_DAYS).length;
+  const buckets = { '7일 이하': 0, '8~30일': 0, '31~90일': 0, '90일+': 0 };
+  ads.forEach(a => {
+    const d = adRunningDays(a);
+    if (d <= 7) buckets['7일 이하']++;
+    else if (d <= 30) buckets['8~30일']++;
+    else if (d <= 90) buckets['31~90일']++;
+    else buckets['90일+']++;
+  });
+  const ctaCounts = new Map();
+  ads.forEach(a => { if (a.ctaText) ctaCounts.set(a.ctaText, (ctaCounts.get(a.ctaText) || 0) + 1); });
+  const topCta = [...ctaCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const hooks = extractHooks(ads);
+
+  box.style.display = 'grid';
+  box.innerHTML = `
+    <div class="card2">
+      <h4>포맷 믹스</h4>
+      ${bar('영상', video, n)}
+      ${bar('이미지', n - video, n)}
+      <div class="ads-bar" style="margin-top:8px"><span class="lab">롱런</span><span class="val" style="color:var(--warning);font-weight:700">${longRun}건 (${Math.round(100 * longRun / n)}%) 30일+</span></div>
+    </div>
+    <div class="card2">
+      <h4>집행 기간 분포</h4>
+      ${Object.entries(buckets).map(([k, v]) => bar(k, v, n)).join('')}
+    </div>
+    <div class="card2">
+      <h4>CTA 분포</h4>
+      ${topCta.length ? topCta.map(([k, v]) => bar(k, v, n)).join('') : '<span class="val">CTA 정보 없음</span>'}
+    </div>
+    <div class="card2">
+      <h4>자주 쓰는 훅·키워드</h4>
+      <div class="ads-hooks">${hooks.length ? hooks.map(([w, c]) => `<span class="hook">${w} <b>${c}</b></span>`).join('') : '<span class="val">반복 키워드 없음</span>'}</div>
+    </div>`;
 }
 
 function renderAdPages(pages) {
@@ -2688,6 +2873,13 @@ function renderAdPages(pages) {
       loadMetaAds();
     };
     box.appendChild(back);
+    const watch = document.createElement('button');
+    watch.type = 'button';
+    watch.className = 'chip';
+    watch.textContent = '★ 워치리스트에 추가';
+    watch.title = '이 광고주를 경쟁사 워치리스트에 등록';
+    watch.onclick = () => addToWatchlist(metaAdsState.pageId, metaAdsState.pageName);
+    box.appendChild(watch);
   } else {
     (pages || []).forEach(p => {
       if (!p.pageId) return;
@@ -2695,12 +2887,16 @@ function renderAdPages(pages) {
       b.type = 'button';
       b.className = 'chip';
       b.textContent = `${p.pageName || p.pageId} (${p.count})`;
-      b.title = '이 페이지의 광고만 모아보기';
+      b.title = '이 페이지의 광고만 모아보기 (★ 우클릭: 워치리스트 추가)';
       b.onclick = () => {
         metaAdsState.type = 'page';
         metaAdsState.pageId = p.pageId;
         metaAdsState.pageName = p.pageName || p.pageId;
         loadMetaAds();
+      };
+      b.oncontextmenu = e => {
+        e.preventDefault();
+        addToWatchlist(p.pageId, p.pageName || p.pageId);
       };
       box.appendChild(b);
     });
@@ -2714,9 +2910,11 @@ async function loadMetaAds(force = false) {
   const q = metaAdsState.type === 'page' ? metaAdsState.pageId : metaAdsState.query;
   resetStatus(status);
   document.getElementById('adsMore').style.display = 'none';
+  document.getElementById('adsTools').style.display = 'none';
+  document.getElementById('adsInsight').style.display = 'none';
   metaAdsState.cursor = '';
   metaAdsState.hasMore = false;
-  metaAdsState.loaded = 0;
+  metaAdsState.ads = [];
   metaAdsState.seen = new Set();
   if (!q) {
     grid.className = 'grid';
@@ -2748,8 +2946,8 @@ async function loadMetaAds(force = false) {
       return;
     }
     appendAds(data.ads);
-    updateAdsCount();
-    renderAdsMore();
+    document.getElementById('adsTools').style.display = 'flex';
+    renderAdsGrid();
   } catch (e) {
     clearSkeleton(grid, 'grid');
     showError(status, 'Meta 광고');
@@ -2768,21 +2966,151 @@ async function loadMoreAds() {
     const data = await res.json();
     metaAdsState.cursor = data.cursor || '';
     metaAdsState.hasMore = Boolean(data.hasMore && data.cursor);
-    appendAds(data.ads || []);
-    updateAdsCount();
     if (!data.ads || !data.ads.length) {
       metaAdsState.hasMore = false;
-      if (isFeedErrorStatus(data)) {
-        const status = document.getElementById('adsStatus');
-        showFeedContractError(status, data);
-      }
+      if (isFeedErrorStatus(data)) showFeedContractError(document.getElementById('adsStatus'), data);
+    } else {
+      appendAds(data.ads);
     }
+    renderAdsGrid();
   } catch (e) {
     metaAdsState.hasMore = false;
+    renderAdsMore();
   } finally {
     metaAdsState.loading = false;
     renderAdsMore();
   }
+}
+
+/* ----- 경쟁사 워치리스트 ----- */
+async function addToWatchlist(pageId, pageName) {
+  if (!pageId) return;
+  try {
+    await fetch('/api/meta_ads/watchlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'add', pageId, pageName }),
+    });
+    loadWatchlistDashboard(true);
+  } catch (e) { /* noop */ }
+}
+
+async function removeFromWatchlist(pageId) {
+  try {
+    await fetch('/api/meta_ads/watchlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'remove', pageId }),
+    });
+    loadWatchlistDashboard(true);
+  } catch (e) { /* noop */ }
+}
+
+function watchMetric(value, cls, suffix) {
+  return `<span class="metric"><b class="${cls || ''}">${value}</b>${suffix || ''}</span>`;
+}
+
+function renderWatchTable(rows) {
+  const table = document.getElementById('adsWatchTable');
+  table.innerHTML = '';
+  if (!rows.length) {
+    table.innerHTML = '<div class="empty-state"><strong>등록된 경쟁사가 없습니다</strong><span>검색 결과의 페이지 칩을 우클릭하거나 "★ 워치리스트에 추가"로 광고주를 등록하세요. 등록하면 소재 수·신규·최장 집행을 한눈에 비교합니다.</span></div>';
+    return;
+  }
+  const head = document.createElement('div');
+  head.className = 'ads-watch-row head';
+  head.innerHTML = '<span>광고주</span><span>집행 소재</span><span>이번 주 신규</span><span>롱런(30일+)</span><span>최장 집행</span><span></span>';
+  table.appendChild(head);
+  rows.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'ads-watch-row';
+    const name = document.createElement('div');
+    name.className = 'ads-watch-name';
+    if (r.pagePic) {
+      const img = document.createElement('img');
+      img.loading = 'lazy'; img.alt = '';
+      img.src = `/api/img?u=${encodeURIComponent(r.pagePic)}`;
+      name.appendChild(img);
+    }
+    const nm = document.createElement('span');
+    nm.textContent = r.pageName || r.pageId;
+    nm.style.cursor = 'pointer';
+    nm.title = '이 광고주 광고 보기';
+    nm.onclick = () => {
+      metaAdsState.type = 'page';
+      metaAdsState.pageId = r.pageId;
+      metaAdsState.pageName = r.pageName || r.pageId;
+      loadedViews.add('meta_ads');
+      loadMetaAds();
+    };
+    name.appendChild(nm);
+    row.appendChild(name);
+    row.insertAdjacentHTML('beforeend', watchMetric(r.error ? '—' : fmt2(r.totalCount), '', ''));
+    row.insertAdjacentHTML('beforeend', watchMetric(r.newThisWeek, 'new', '건'));
+    row.insertAdjacentHTML('beforeend', watchMetric(r.longRun, '', `건 / ${r.videoShare}% 영상`));
+    row.insertAdjacentHTML('beforeend', watchMetric(r.longestDays, '', '일'));
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'ads-watch-del';
+    del.textContent = '삭제';
+    del.onclick = () => removeFromWatchlist(r.pageId);
+    row.appendChild(del);
+    table.appendChild(row);
+  });
+}
+
+async function loadWatchlistDashboard(force = false) {
+  const wrap = document.getElementById('adsWatch');
+  const status = document.getElementById('adsWatchStatus');
+  try {
+    const wl = await (await fetch('/api/meta_ads/watchlist')).json();
+    const list = wl.watchlist || [];
+    if (!list.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    resetStatus(status);
+    status.style.display = 'block';
+    status.textContent = '경쟁사 데이터를 불러오는 중…';
+    const params = new URLSearchParams({ country: document.getElementById('adsCountry').value });
+    if (force) params.set('force', '1');
+    const data = await (await fetch('/api/meta_ads/dashboard?' + params.toString())).json();
+    status.style.display = 'none';
+    renderWatchTable(data.rows || []);
+  } catch (e) {
+    status.style.display = 'block';
+    status.textContent = '경쟁사 데이터를 불러오지 못했습니다.';
+  }
+}
+
+/* ----- 정렬·필터 컨트롤 ----- */
+function initAdsControls() {
+  const seg = document.getElementById('adsSort');
+  seg.className = 'ads-seg';
+  AD_SORTS.forEach(s => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = s.label;
+    b.className = s.key === metaAdsState.sort ? 'active' : '';
+    b.onclick = () => {
+      metaAdsState.sort = s.key;
+      seg.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+      renderAdsGrid();
+    };
+    seg.appendChild(b);
+  });
+  document.getElementById('adsLongRun').addEventListener('click', e => {
+    metaAdsState.longRunOnly = !metaAdsState.longRunOnly;
+    e.currentTarget.setAttribute('aria-pressed', metaAdsState.longRunOnly ? 'true' : 'false');
+    renderAdsGrid();
+  });
+}
+
+// 탭 진입 시: 이미 검색 결과가 있으면 새로고침만 트리거될 때 재검색, 아니면
+// 워치리스트 대시보드를 로드하고 검색 대기 상태를 보여준다.
+function loadMetaAdsTab(force = false) {
+  loadWatchlistDashboard(force);
+  const q = metaAdsState.type === 'page' ? metaAdsState.pageId : metaAdsState.query;
+  if (q) loadMetaAds(force);
+  else loadMetaAds();
 }
 
 document.getElementById('adsForm').addEventListener('submit', e => {
@@ -2795,11 +3123,14 @@ document.getElementById('adsForm').addEventListener('submit', e => {
   loadMetaAds();
 });
 document.getElementById('adsMoreBtn').addEventListener('click', loadMoreAds);
+document.getElementById('adsWatchRefresh').addEventListener('click', () => loadWatchlistDashboard(true));
 ['adsCountry', 'adsActive', 'adsMedia'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => {
     if (metaAdsState.type === 'page' ? metaAdsState.pageId : metaAdsState.query) loadMetaAds();
+    if (id === 'adsCountry') loadWatchlistDashboard(true);
   });
 });
+initAdsControls();
 
 /* ---------- 초기화 ---------- */
 function initAccountManagers() {

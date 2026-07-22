@@ -16,9 +16,9 @@ aliases: [meta_ads 모듈, 광고 라이브러리 수집, Meta Ad Library]
 
 | 파일 | 라인 수 | 역할 |
 |---|---:|---|
-| `src/meta_ads/__init__.py` | 2 | fetch_first_page·fetch_more·get_meta_ads 배럴 export |
-| `src/meta_ads/meta_ads_tool.py` | 403 | 첫 페이지 HTML 수집 + GraphQL 페이지네이션·챌린지 해결·doc_id config |
-| `src/meta_ads/test_meta_ads_tool.py` | 344 | 파서·챌린지·페이지네이션·doc_id·캐시 계약 테스트 |
+| `src/meta_ads/__init__.py` | 18 | 배럴 export (검색·페이지네이션·워치리스트·자산) |
+| `src/meta_ads/meta_ads_tool.py` | 521 | 검색·페이지네이션·워치리스트 대시보드·자산 다운로드·doc_id config |
+| `src/meta_ads/test_meta_ads_tool.py` | 440 | 파서·챌린지·페이지네이션·워치리스트·자산·캐시 계약 테스트 |
 
 ## Module Responsibility
 
@@ -62,6 +62,26 @@ aliases: [meta_ads 모듈, 광고 라이브러리 수집, Meta Ad Library]
 
 `COUNTRIES = ("KR", "US", "JP", "TW", "ALL")`. 프론트 select도 같은 순서다.
 `ALL`은 페이지네이션 변수에서 `countries: []`로 변환한다.
+
+### 실무 기능 (검색을 인텔리전스로)
+
+raw 검색을 넘어 판단을 돕는 4개 기능. 광고 라이브러리에서 무료로 얻는 가장 강한
+신호는 **광고 수명**(오래 집행 = 검증된 승자)이라는 전제 위에 설계했다.
+
+1. **롱런 탐지**: 집행 일수 = `now - startDate`. 프론트에서 계산해 배지(30일+ 롱런,
+   90일+ 🔥)와 정렬(관련순/롱런순/신규순), `30일+ 롱런만` 필터를 제공한다.
+   `LONG_RUN_DAYS = 30`.
+2. **크리에이티브 인사이트**: 로드된 광고를 프론트에서 집계 — 포맷 믹스(영상/이미지),
+   집행 기간 분포, CTA 분포, 카피 훅/키워드(불용어 제거, `{{product.name}}` 등
+   다이내믹 카탈로그 템플릿 자리표시자 제거). 3건 이상일 때만 표시.
+3. **경쟁사 워치리스트**: `config/meta_ads_watchlist.json`에 `[{pageId, pageName}]`
+   저장. `get_watchlist_dashboard`가 각 페이지를 page 검색으로 병렬 조회(`ThreadPoolExecutor`,
+   max 4)해 요약 행(집행 소재 수 totalCount, 이번 주 신규, 롱런 수, 최장 집행일,
+   영상 비중, 최장수 광고)을 만든다. 신규/롱런/영상비중은 첫 페이지 표본(≤30) 기준,
+   totalCount는 전체.
+4. **스와이프 파일**: `fetch_asset`이 fbcdn 호스트의 영상/이미지를 curl로 받아
+   Content-Disposition attachment로 반환(다운로드). 북마크 저장 시 카피·CTA·집행
+   일수를 note로, 페이지명·포맷·롱런 여부를 tags로 함께 저장한다(저장됨 탭에 note 표시).
 
 ### 운영 관점
 
@@ -126,6 +146,20 @@ aliases: [meta_ads 모듈, 광고 라이브러리 수집, Meta Ad Library]
   페이지네이션(캐시 key에 `("page", cursor)` 추가, 저장된 lsd 재사용).
   `(data, fetched_at, errors, cache_ttl)` 반환. data에 `cursor`/`hasMore` 포함.
 
+### `load_watchlist()` / `update_watchlist(action, page_id, page_name)`
+
+- `config/meta_ads_watchlist.json` 로드/추가/삭제. 숫자 page_id만 허용, 중복 무시.
+
+### `_summarize_page(entry, country, now)` / `get_watchlist_dashboard(country, force)`
+
+- page 검색 한 번으로 경쟁사 요약 행 생성. 대시보드는 워치리스트 전체를 병렬 조회해
+  `{rows, watchlist}` 반환(캐시 key에 정렬된 pageId 튜플 포함).
+
+### `fetch_asset(url)`
+
+- fbcdn 호스트의 영상/이미지를 curl로 받아 `(status, content_type, body, filename)`
+  반환. 비-fbcdn·비-https는 400, 실패는 502.
+
 ### 테스트 함수 지도
 
 - `ParseTest`: parse_html(ads/count/cursor·dedupe·broken), parse_ad(image·carousel),
@@ -135,21 +169,28 @@ aliases: [meta_ads 모듈, 광고 라이브러리 수집, Meta Ad Library]
 - `FetchMoreTest`: ok(docid+cursor)·requires_cursor_lsd·docid_expired·http_error
 - `GetMetaAdsTest`: negative_ttl·stores_context·has_more_false_no_lsd·
   pagination_uses_stored_lsd·serves_cache
+- `WatchlistTest`: add_and_remove·rejects_non_numeric·dashboard_summarizes_pages
+- `AssetTest`: rejects_non_fbcdn·rejects_non_https·downloads_video·downloads_image·
+  fetch_failure_502
 
 ## Dependencies
 
-- `json`, `os`, `re`, `subprocess`, `threading`, `uuid`, `urllib.parse.urlencode`
+- `json`, `os`, `re`, `subprocess`, `threading`, `time`, `uuid`,
+  `concurrent.futures.ThreadPoolExecutor`, `urllib.parse`
 - 시스템 `curl` 바이너리 (Windows 10+/macOS 기본 탑재)
 - `settings.UA`, `settings.CONFIG_DIR`
 - `shared.cache_tool`
 
 ## Dependents
 
-- `src/main.py` `/api/meta_ads` 라우트 (`q`, `type`, `country`, `status`,
-  `media`, `cursor`, `force` 파라미터 검증 후 `get_meta_ads` 호출)
-- `src/frontend/index.html` 광고 탭: `loadMetaAds`/`loadMoreAds`, `adCard`,
-  `renderAdPages`(페이지 칩 드릴다운), `appendAds`(누적·dedupe), 더 보기 버튼
-  (`#adsMoreBtn`), 썸네일은 `/api/img` 프록시(.fbcdn.net 허용) 경유
+- `src/main.py` 라우트: `/api/meta_ads`(검색·페이지네이션), `/api/meta_ads/dashboard`
+  (워치리스트 요약), `/api/meta_ads/watchlist`(GET·POST), `/api/meta_ads/asset`(다운로드)
+- `src/frontend/index.html` 광고 탭: `loadMetaAdsTab`(진입 시 워치리스트+검색),
+  `loadMetaAds`/`loadMoreAds`, `adCard`(롱런 배지·다운로드 버튼·풍부한 북마크),
+  `renderAdsGrid`(정렬·필터 재렌더), `renderAdsInsight`(집계 패널), `sortedFilteredAds`,
+  `renderWatchTable`/`loadWatchlistDashboard`/`addToWatchlist`, `initAdsControls`.
+  썸네일·자산은 `/api/img`·`/api/meta_ads/asset` 경유. 저장됨 탭 `savedCard`는
+  meta_ads 북마크의 note를 표시(`createBookmarkButton`이 note·tags 전달)
 
 ## Sync Checklist
 
@@ -161,6 +202,9 @@ aliases: [meta_ads 모듈, 광고 라이브러리 수집, Meta Ad Library]
       (`ad_archive_id`+`snapshot`)과 `_parse_graphql`부터 의심한다.
 - [ ] doc_id가 만료되면 브라우저 네트워크 탭에서 `AdLibrarySearchPaginationQuery`의
       새 doc_id를 찾아 `config/meta_ads_doc_ids.json`에 넣는다.
+- [ ] ad item에 새 필드가 생기면 인사이트 집계(`renderAdsInsight`)·훅 추출·워치리스트
+      요약(`_summarize_page`)이 활용하는지 검토한다.
+- [ ] 워치리스트 요약 통계가 첫 페이지 표본 기준임을 UI가 오해시키지 않는지 확인한다.
 
 ## 변경 기록
 
@@ -168,6 +212,8 @@ aliases: [meta_ads 모듈, 광고 라이브러리 수집, Meta Ad Library]
   프론트 광고 탭 연동.
 - 2026-07-22: GraphQL 페이지네이션("더 보기"), doc_id config 파일, 대만(TW) 국가,
   LSD 세션 컨텍스트 추가.
+- 2026-07-22: 실무 기능 추가 — 롱런 탐지(배지·정렬·필터), 크리에이티브 인사이트 집계,
+  경쟁사 워치리스트 대시보드, 스와이프 파일(자산 다운로드·컨텍스트 저장).
 
 ## 문서 연결
 

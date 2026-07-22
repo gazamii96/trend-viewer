@@ -22,7 +22,9 @@ import os
 import re
 import subprocess
 import threading
+import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlencode
 
 import settings
@@ -38,6 +40,10 @@ MEDIA_TYPES = ("all", "video", "image")
 SEARCH_TYPES = ("keyword", "page")
 PAGE_SIZE = 30
 
+LONG_RUN_DAYS = 30  # an ad running this long is treated as a proven winner
+_WATCHLIST_CONFIG = os.path.join(settings.CONFIG_DIR, "meta_ads_watchlist.json")
+_WATCHLIST_MAX_WORKERS = 4
+_ASSET_ALLOW = (".fbcdn.net",)
 _COOKIE_JAR = os.path.join(settings.CONFIG_DIR, "meta_ads_cookies.txt")
 # Built-in fallback doc_id (may go stale). config/meta_ads_doc_ids.json wins
 # and can be refreshed from the browser network tab when Meta rotates it.
@@ -456,3 +462,135 @@ def get_meta_ads(query, country, search_type, active_status, media_type,
         page_key, force, fetch_page, ttl=ttl_for_outcome
     )
     return data, fetched_at, errors, cache_tool.ttl_for(page_key)
+
+
+# ---------------------------------------------------------------------------
+# Competitor watchlist
+# ---------------------------------------------------------------------------
+
+def load_watchlist():
+    """Return the saved competitor pages: [{pageId, pageName}, ...]."""
+    try:
+        with open(_WATCHLIST_CONFIG, encoding="utf-8") as f:
+            items = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    out = []
+    for item in items if isinstance(items, list) else []:
+        if isinstance(item, dict) and str(item.get("pageId") or "").isdigit():
+            out.append({"pageId": str(item["pageId"]),
+                        "pageName": item.get("pageName") or ""})
+    return out
+
+
+def _save_watchlist(items):
+    os.makedirs(settings.CONFIG_DIR, exist_ok=True)
+    with open(_WATCHLIST_CONFIG, "w", encoding="utf-8") as f:
+        json.dump(items, f, ensure_ascii=False, indent=2)
+
+
+def update_watchlist(action, page_id, page_name=""):
+    """Add or remove a competitor page. Returns the updated list."""
+    page_id = str(page_id or "").strip()
+    items = load_watchlist()
+    if action == "add" and page_id.isdigit():
+        if not any(i["pageId"] == page_id for i in items):
+            items.append({"pageId": page_id, "pageName": page_name or ""})
+            _save_watchlist(items)
+    elif action == "remove":
+        filtered = [i for i in items if i["pageId"] != page_id]
+        if len(filtered) != len(items):
+            items = filtered
+            _save_watchlist(items)
+    return items
+
+
+def _running_days(ad, now):
+    start = ad.get("startDate") or 0
+    return int((now - start) / 86400) if start else 0
+
+
+def _summarize_page(entry, country, now):
+    """Fetch one competitor page's first result set and reduce it to a
+    dashboard row. Stats are over the sampled first page (up to PAGE_SIZE),
+    except totalCount which is the page's full active-ad count."""
+    page_id = entry["pageId"]
+    ads, _, total, _, _, _, error = fetch_first_page(
+        page_id, country, "page", "active", "all"
+    )
+    row = {
+        "pageId": page_id,
+        "pageName": entry.get("pageName") or (ads[0]["pageName"] if ads else page_id),
+        "pagePic": ads[0]["pagePic"] if ads else "",
+        "totalCount": total,
+        "sampleCount": len(ads),
+        "newThisWeek": sum(1 for a in ads if 0 <= _running_days(a, now) <= 7),
+        "longRun": sum(1 for a in ads if _running_days(a, now) >= LONG_RUN_DAYS),
+        "longestDays": max((_running_days(a, now) for a in ads), default=0),
+        "videoShare": (round(100 * sum(
+            1 for a in ads if a.get("displayFormat") == "VIDEO" or a.get("videoUrl")
+        ) / len(ads)) if ads else 0),
+        "topAd": None,
+        "error": bool(error),
+    }
+    if ads:
+        best = max(ads, key=lambda a: _running_days(a, now))
+        row["topAd"] = {
+            "id": best["id"], "url": best["url"], "thumbnail": best["thumbnail"],
+            "title": best["title"] or best["body"], "days": _running_days(best, now),
+        }
+    return row
+
+
+def get_watchlist_dashboard(country, force):
+    """Fetch a summary row for every watched page. Returns
+    (data, fetched_at, cache_ttl). data = {rows, watchlist}."""
+    watchlist = load_watchlist()
+    cache_key = ("meta_ads_dashboard", country, tuple(sorted(i["pageId"] for i in watchlist)))
+
+    def fetch():
+        now = time.time()
+        if not watchlist:
+            return {"rows": [], "watchlist": []}
+        with ThreadPoolExecutor(max_workers=_WATCHLIST_MAX_WORKERS) as pool:
+            rows = list(pool.map(
+                lambda e: _summarize_page(e, country, now), watchlist
+            ))
+        rows.sort(key=lambda r: -r["totalCount"])
+        return {"rows": rows, "watchlist": watchlist}
+
+    def ttl_for_outcome(outcome):
+        return NEGATIVE_CACHE_TTL if not outcome["rows"] else None
+
+    data, fetched_at = cache_tool.cached(cache_key, force, fetch, ttl=ttl_for_outcome)
+    return data, fetched_at, cache_tool.ttl_for(cache_key)
+
+
+# ---------------------------------------------------------------------------
+# Creative asset download (swipe file)
+# ---------------------------------------------------------------------------
+
+def fetch_asset(url):
+    """Download a creative (image/video) from an fbcdn host for the swipe
+    file. Returns (status, content_type, body_bytes, filename)."""
+    from urllib.parse import urlparse
+
+    host = urlparse(url).netloc.lower()
+    if not url.startswith("https://") or not host.endswith(_ASSET_ALLOW):
+        return 400, "application/json; charset=utf-8", \
+            json.dumps({"error": "host not allowed"}).encode(), ""
+    is_video = "video" in host or ".mp4" in url.split("?", 1)[0]
+    ext = "mp4" if is_video else "jpg"
+    ctype = "video/mp4" if is_video else "image/jpeg"
+    try:
+        proc = subprocess.run(
+            ["curl", "-sL", "--compressed", "-A", settings.UA, url],
+            capture_output=True, timeout=60,
+        )
+        if proc.returncode != 0 or not proc.stdout:
+            return 502, "application/json; charset=utf-8", \
+                json.dumps({"error": "fetch failed"}).encode(), ""
+        return 200, ctype, proc.stdout, "meta_ad_creative." + ext
+    except (subprocess.TimeoutExpired, OSError):
+        return 502, "application/json; charset=utf-8", \
+            json.dumps({"error": "fetch failed"}).encode(), ""

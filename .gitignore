@@ -11,4 +11,5 @@ config/.threads_docid_expired
 config/analysis_history.json
 config/meta_ads_cookies.txt
 config/meta_ads_doc_ids.json
+config/meta_ads_watchlist.json
 config/.meta_ads_docid_expired

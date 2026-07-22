@@ -164,6 +164,35 @@ class Handler(BaseHTTPRequestHandler):
                          "status": _feed_status(data["ads"], errors),
                          "errors": errors})
 
+    def _handle_meta_ads_dashboard(self, qs):
+        force = qs.get("force", ["0"])[0] == "1"
+        country = qs.get("country", ["KR"])[0].upper()
+        if country not in meta_ads_tool.COUNTRIES:
+            country = "KR"
+        data, fetched_at, cache_ttl = meta_ads_tool.get_watchlist_dashboard(country, force)
+        self._send(200, {**data, "country": country, "fetchedAt": fetched_at,
+                         "cacheTtl": cache_ttl})
+
+    def _handle_meta_ads_watchlist_get(self, qs):
+        del qs
+        self._send(200, {"watchlist": meta_ads_tool.load_watchlist()})
+
+    def _handle_meta_ads_asset(self, qs):
+        status, content_type, body, filename = meta_ads_tool.fetch_asset(
+            qs.get("u", [""])[0]
+        )
+        if status == 200:
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Content-Disposition",
+                             'attachment; filename="%s"' % filename)
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+        else:
+            self._send(status, body, content_type)
+
     def _handle_oembed(self, qs):
         self._send(200, ai_news_tool.fetch_oembed(qs.get("url", [""])[0]))
 
@@ -196,6 +225,9 @@ class Handler(BaseHTTPRequestHandler):
             "/api/threads": self._handle_threads,
             "/api/ai": self._handle_ai,
             "/api/meta_ads": self._handle_meta_ads,
+            "/api/meta_ads/dashboard": self._handle_meta_ads_dashboard,
+            "/api/meta_ads/watchlist": self._handle_meta_ads_watchlist_get,
+            "/api/meta_ads/asset": self._handle_meta_ads_asset,
             "/api/date": self._handle_date,
             "/api/analysis": self._handle_analysis,
             "/api/oembed": self._handle_oembed,
@@ -243,6 +275,23 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, {"items": items, "removed": removed})
             else:
                 self._send(400, {"error": "unknown action"})
+            return
+
+        if parsed.path == "/api/meta_ads/watchlist":
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                req = json.loads(self.rfile.read(length).decode())
+            except json.JSONDecodeError:
+                self._send(400, {"error": "invalid json"})
+                return
+            action = req.get("action")
+            if action not in ("add", "remove"):
+                self._send(400, {"error": "unknown action"})
+                return
+            watchlist = meta_ads_tool.update_watchlist(
+                action, req.get("pageId", ""), req.get("pageName", "")
+            )
+            self._send(200, {"watchlist": watchlist})
             return
 
         m = re.match(r"^/api/([a-z_]+)/accounts$", parsed.path)
